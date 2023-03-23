@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client websocket</title>
+    <script type="text/javascript">
+          window.onload = function () {
+        let conn;
+        let log = document.getElementById("log");
+        let msg = document.getElementById("msg");
+
+        function appendLog(item) {
+                let doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+                log.appendChild(item);
+                if (doScroll) {
+                    log.scrollTop = log.scrollHeight - log.clientHeight;
+                }
+            }
+
+        const params = window.location.href.split("/");
+        const roomId = params[params.length - 1];
+
+        document.getElementById("form").onsubmit = function() {
+            if(!conn){
+                return false;
+            }
+            if(!msg.value){
+                return false;
+            }
+            conn.send(msg.value);
+            msg.value = "";
+            return false;
+        }
+
+
+        conn = new WebSocket("ws://"+document.location.host+"/ws/"+roomId);
+
+        conn.onmessage = function(evt){
+            let messages = evt.data.split("\n");
+            for(let i=0; i<messages.length; i++){
+                    let item = document.createElement("div");
+                    item.innerHTML = messages[i];
+                    appendLog(item);
+            }
+        };
+    };
+
+    </script>
+</head>
+<body>
+    <div id="log"></div>
+<form id="form">
+    <input type="submit" value="Send"/>
+    <input type="text" id="msg" size="64" autofocus/>
+</form>
+</body>
+</html>
